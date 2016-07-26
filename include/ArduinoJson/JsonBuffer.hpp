@@ -14,16 +14,6 @@
 #include "JsonVariant.hpp"
 #include "String.hpp"
 
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-#elif defined(__GNUC__)
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
-#pragma GCC diagnostic push
-#endif
-#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#endif
-
 namespace ArduinoJson {
 class JsonArray;
 class JsonObject;
@@ -117,13 +107,18 @@ class JsonBuffer {
   char *strdup(const char *src) {
     return src ? strdup(src, strlen(src)) : NULL;
   }
-  char *strdup(const String &src) { return strdup(src.c_str(), src.length()); }
+  char *strdup(const String &src) {
+    return strdup(src.c_str(), src.length());
+  }
 
   // Allocates n bytes in the JsonBuffer.
   // Return a pointer to the allocated memory or NULL if allocation fails.
   virtual void *alloc(size_t size) = 0;
 
  protected:
+  // The destructor is hidden to dissallow destruction from base class
+  ~JsonBuffer() {}
+
   // Preserve aligment if nessary
   static FORCE_INLINE size_t round_size_up(size_t bytes) {
 #if ARDUINOJSON_ENABLE_ALIGNMENT
@@ -153,11 +148,3 @@ class JsonBuffer {
   static const uint8_t DEFAULT_LIMIT = 10;
 };
 }
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
-#pragma GCC diagnostic pop
-#endif
-#endif
